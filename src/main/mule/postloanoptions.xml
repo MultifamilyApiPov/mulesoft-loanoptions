@@ -4,11 +4,11 @@ http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mu
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
     <http:listener-config name="postloanoptions-httpListenerConfig">
-        <http:listener-connection host="0.0.0.0" port="9002" />
+        <http:listener-connection host="0.0.0.0" port="${http.port}" />
     </http:listener-config>
     <apikit:config name="postloanoptions-config" raml="postloanoptions.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
     <salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="2137b71e-e79f-42e6-bec0-9421018c04ae" >
-		<salesforce:basic-connection username="" password="" url="" />
+		<salesforce:basic-connection username="${sfdc.username}" password="${sfdc.password}" url="https://test.salesforce.com/services/Soap/u/43.0" />
 	</salesforce:sfdc-config>
 	<flow name="postloanoptions-main">
         <http:listener config-ref="postloanoptions-httpListenerConfig" path="/api/*">
@@ -345,7 +345,7 @@ payload]]></ee:set-payload>
 	</sub-flow>
 	<sub-flow name="MiscValidations" doc:id="05061d23-01fe-4926-befa-c8defd384b82" >
 		<validation:is-false doc:name="Validate loanTermMonths" doc:id="22fa8c90-0f78-4dec-a128-565839e11c14" expression="#[payload.loanTermMonths &gt; payload.amortizationTermMonths]" message="Loan Term Months cannot be greater than Amortization Term Months"/>
-		<validation:is-false doc:name="Validate interestOnlyPeriodMonths" doc:id="a203e913-596d-4c7c-a37a-3f1d935333aa" expression="#[payload.interestOnlyPeriodMonths &lt;= payload.loanTermMonths]"/>
+		<validation:is-false doc:name="Validate interestOnlyPeriodMonths" doc:id="a203e913-596d-4c7c-a37a-3f1d935333aa" expression="#[payload.interestOnlyPeriodMonths &gt; payload.loanTermMonths]" message="interestOnlyPeriodMonths cannot be greater than loanTermMonths"/>
 		<validation:is-false doc:name="Validate prepaymentComponenttoMonths1" doc:id="5d9ddbba-3707-4bda-885c-ef7e9e1b69d2" expression="#[payload.prepaymentComponenttoMonths1 &lt; 0 or payload.prepaymentComponenttoMonths1 &gt; payload.loanTermMonths]" message="prepaymentComponenttoMonths1 cannot be less than zero and should be always less than or equal to loan term months"/>
 		<validation:is-false doc:name="Validate prepaymentComponenttoMonths2" doc:id="5edf21af-efc7-4de6-9fc4-bf88e3f3c575" expression="#[payload.prepaymentComponenttoMonths2 &lt; 0 or payload.prepaymentComponenttoMonths2 &gt; payload.loanTermMonths]" message="prepaymentComponenttoMonths2 cannot be less than zero and should be always less than or equal to loan term months"/>
 	</sub-flow>
