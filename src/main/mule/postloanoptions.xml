@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+    <http:listener-config name="postloanoptions-httpListenerConfig">
+        <http:listener-connection host="0.0.0.0" port="9002" />
+    </http:listener-config>
+    <apikit:config name="postloanoptions-config" raml="postloanoptions.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="2137b71e-e79f-42e6-bec0-9421018c04ae" >
+		<salesforce:basic-connection username="" password="" url="" />
+	</salesforce:sfdc-config>
+	<flow name="postloanoptions-main">
+        <http:listener config-ref="postloanoptions-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="postloanoptions-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="ddc65b22-906d-4829-af3a-059af8a849f0">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: error.description}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[400]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="2917dfbe-7a1e-477c-84a7-1efd3b982aeb">
+				<ee:transform doc:name="Transform Message" doc:id="689dc506-7c54-446d-8f2f-c43e21c100e3" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{"message":error.description}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="postloanoptions-console">
+        <http:listener config-ref="postloanoptions-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="postloanoptions-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+	<sub-flow name="QueryDealId" doc:id="6a465022-cae3-432f-ba1c-0f862c0a32ad" >
+		<salesforce:query doc:name="Query Opportunity" doc:id="90b95588-5406-4b0a-99d7-516b6609b682" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query >SELECT Id FROM Opportunity WHERE Deal_Id__c = ':dealId'</salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	"dealId" : payload.dealId
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<ee:transform doc:name="Set variable OpportunityId" doc:id="99fd72fa-ca36-4db3-a5b3-2d872215dd45" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="opportunityId" ><![CDATA[%dw 2.0
+output application/java
+---
+payload.Id[0]]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+	</sub-flow>
+	<flow name="post:\loanoption:application\json:postloanoptions-config">
+        <logger level="INFO" message="post:\loanoption:application\json:postloanoptions-config" />
+		<flow-ref doc:name="Validate Against Interest Type" doc:id="0f8c88ec-5f79-44e9-9742-21e1260083d8" name="ValidateAgainstInterestType"/>
+		<flow-ref doc:name="Validate against Variable Product Type" doc:id="e6d2775c-a6d5-45b2-84d5-5c7d1bfc935b" name="ValidateAgainstProductType"/>
+		<flow-ref doc:name="Validate against prepayment components" doc:id="bdb12528-e5b1-4907-9aeb-df036e240f8e" name="ValidateAgainstPrepayComps"/>
+		<flow-ref doc:name="Miscellaneous validations" doc:id="159d43a0-7241-4b30-a486-759d8419223b" name="MiscValidations"/>
+		<set-variable value="#[payload]" doc:name="Set incoming Payload as originalPayload" doc:id="cde7f60a-34fb-42f3-b88f-e757e4f9c34b" variableName="originalPayload"/>
+		<flow-ref doc:name="get Deal Id" doc:id="a37c230a-8a07-4b94-9cb1-cc05ef0acf33" name="QueryDealId" />
+		<set-payload value="#[vars.originalPayload]" doc:name="Set originalPayload as current payload" doc:id="875df38e-df96-478d-9b51-c8a2ca11ea4e" />
+		<ee:transform doc:name="Map incoming payload to Salesforce object" doc:id="ba7dbb45-da04-431b-a008-1ec0b2fa0d6a">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+[{
+	Alternate_Exit_Amortization_Term__c: payload.expectedExitAmortizationTerm,
+	Alternate_Exit_Maximum_LTV__c: payload.expectedExitMaximumLTV as String,
+	Alternate_Exit_Maximum_Terminal_Cap_Rate__c: payload.expectedExitTerminalCapRate as String,
+	Alternate_Exit_Minimum_DSCR__c: payload.expectedExitMinUWDSCRperGuide,
+	Alternate_Exit_Refinance_Costs__c: payload.expectedExitRefinanceCosts as String,
+	Alternate_Exit_Refinance_Interest_Rate__c: payload.expectedExitRefinanceInterestRate as String,
+	Amortization_Term_months__c: payload.amortizationTermMonths,
+	At_Requested_Maximum_LTC_Amount__c: payload.requestedMaximumLTC as String,
+	At_Requested_Maximum_LTV_Amount__c: payload.requestedMaximumLTV as String,
+	Cap_Cost_Factor__c: payload.capCostFactor as String,
+	Comments__c: payload.Comments,
+	Commitment_Period_days__c: payload.commitmentPerioddays,
+	Deal__c: vars.opportunityId,
+	Declining_Premium_Schedule__c: payload.decliningPremiumSchedule,
+	Development_Construction_Cost__c: payload.propertyDevelopmentConstructionCost as String,
+	Economic_Vacancy_Amount__c: payload.propertyEconomicVacancyAmount as String,
+	Estimated_Origination_Fee__c: payload.estimatedOriginationFee as String,
+	Excess_Origination_Premium_Amount__c: payload.excessOriginationPremiumAmount as String,
+	Fixed_Index_Rate_Type__c: payload.fixedIndexRateType,
+	Fixed_Rate_Test_Actual_Cooperative_DSCR__c: payload.guideFRTMinActualCooperativeDSCR,
+	Fixed_Rate_Test_LTV__c: payload.guideFRTLTV as String,
+	Fixed_Rate_Test_Req_Actual_Co_op_DSCR__c: payload.requestedFRTMinActualNCFCOOPDSCR,
+	Fixed_Rate_Test_Requested_LTV__c: payload.requestedFRTLTV as String,
+	Fixed_Rate_Test_Requested_UW_DSCR__c: payload.requestedFRTMinUWDSCRperGuide,
+	Fixed_Rate_Test_Underwritten_DSCR__c: payload.guideFRTMinUWDSCRperGuide,
+	Funded_Capital_Improvements__c: payload.propertyFundedCapitalImprovements as String,
+	Funded_Completion_Repairs__c: payload.propertyFundedCompletionRepairs as String,
+	Funded_Initial_Replacement_Reserves__c: payload.propertyFundedCapitalExpendituresReplacementReserveAccount as String,
+	Funded_Other_Escrows__c: payload.propertyFundedOtherEscrows as String,
+	Index_Rate_Type__c: payload.indexRateType,
+	Index_Rate__c: payload.indexRate as String,
+	Interest_Basis__c: payload.interestBasis,
+	Interest_Only_Period_months__c: payload.interestOnlyPeriodMonths,
+	Interest_Rate_Cap_Hedging_Fees__c: payload.interestRateCapHedgingFees as String,
+	Interest_Type__c: payload.interestType,
+	LIHTC_Equity__c: payload.lIHTCEquity as String,
+	Latest_Pricing_Memo_Guaranty_Fee__c: payload.latestPricingMemoGuarantyFee as String,
+	Latest_Pricing_Memo_Servicing_Fee__c: payload.latestPricingMemoServicingFee as String,
+	Lender_Closing_Transaction_Fees__c: payload.lenderClosingTransactionFees as String,
+	Lien_Position__c: payload.lienPosition,
+	Loan_Amount__c: payload.loanAmount as String,
+	Loan_Purchase_Price_of_par__c: payload.loanPurchasePriceofpar as String,
+	Loan_Term_months__c: payload.loanTermMonths,
+	Loss_Sharing_Percent__c: payload.lossSharingPercent as String,
+	Mezz_Preferred_Equity_1__c: payload.mezzPreferredEquity1 as String,
+	Mezz_Preferred_Equity_2__c: payload.mezzPreferredEquity2 as String,
+	Mezzanine_and_Preferred_Equity_Debt_Serv__c: payload.mezzanineandPreferredEquityDebtService as String,
+	Origination_Fee_Paid_to_Broker__c: payload.originationFeePaidtoBroker as String,
+	Origination_Fee_Paid_to_Correspondent__c: payload.originationFeePaidtoCorrespondent as String,
+	Origination_Fees__c: payload.originationFees as String,
+	Other_Fixed_Rate_Fee_or_Spread__c: payload.otherFixedRateFeeSpread as String,
+	Other_Prepayment_Premium_Schedule__c: payload.otherPrepaymentPremiumSchedule,
+	Other_Sources__c: payload.otherSources as String,
+	Other_Uses__c: payload.otherUses as String,
+	Payoff_Affiliated_Mezz_Pref_Equity__c: payload.affiliatedMezzanineDebtorPreferredEquityPayoff as String,
+	Payoff_Existing_Mortgage_Loan__c: payload.payoffExistingMortgageLoan as String,
+	Payoff_Unaffiliated_Mezz_Pref_Equity__c: payload.nonAffiliatedMezzanineDebtorPreferredEquityPayoff as String,
+	Prepayment_Component_1__c: payload.prepaymentComponent1,
+	Prepayment_Component_2__c: payload.prepaymentComponent2,
+	Prepayment_Component_to_Months_1__c: payload.prepaymentComponenttoMonths1,
+	Prepayment_Component_to_Months_2__c: payload.prepaymentComponenttoMonths2,
+	Prepayment_Premium__c: payload.prepaymentPremium as String,
+	Pricing_Method__c: payload.pricingMethod,
+	Property_Actual_Cooperative_NCF__c: payload.propertyActualCooperativeNCF as String,
+	Property_Cost__c: payload.propertyCost as String,
+	Property_Gross_Potential_Rent_Amount__c: payload.propertyGrossPotentialRent as String,
+	Property_Insurance_Expense_Amount__c: payload.propertyInsurance as String,
+	Property_Management_Expense_Amount__c: payload.propertyManagementFee as String,
+	Property_Other_Expense_Amount__c: payload.propertyOtherExpenses as String,
+	Property_Other_Income_Amount__c: payload.propertyOtherIncome as String,
+	Property_Purchase_Price__c: payload.propertyPurchasePrice as String,
+	Property_Real_Estate_Tax_Amount__c: payload.propertyRealEstateTaxes as String,
+	Property_Replacement_Reserve_Annual_Amou__c: payload.propertyReplacementReserves as String,
+	Property_Total_Number_of_Units__c: payload.propertyUnitCount,
+	Property_Underwritten_Value__c: payload.propertyUnderwrittenValue as String,
+	Rate_Lock_Type__c: payload.rateLockType,
+	Requested_Fixed_Rate_Guaranty_Fee__c: payload.requestedFixedRateGuarantyFee as String,
+	Requested_Fixed_Rate_Servicing_Fee__c: payload.requestedFixedRateServicingFee as String,
+	Requested_Fixed_Rate_Test_Min_Amortizing__c: payload.requestedFRTMinAmortizingUWNCFDSCR,
+	Requested_Min_Actual_Cooperative_DSCR__c: payload.requestedMinActualCooperativeDSCR,
+	Requested_Minimum_Actual_DSCR__c: payload.requestedMinAmortizingUWNCFDSCR,
+	Requested_Minimum_Underwritten_DSCR__c: payload.requestedMinUWDSCRperGuide,
+	Requested_Tier_Level__c: payload.requestedTierLevel,
+	Requested_Variable_Rate_Guaranty_Fee__c: payload.requestedVariableRateGuarantyFee as String,
+	Requested_Variable_Rate_Servicing_Fee__c: payload.requestedVariableRateServicingFee as String,
+	SARM_Initial_Cap_Term_yrs__c: payload.sARMInitialCapTermMonths,
+	SARM_Min_Cap_Strike_Rate__c: payload.sARMMinCapStrikeRate as String,
+	Status__c: payload.Status,
+	Stress__c: payload.underwrittenStressMaxLifetimePassThruRate as String,
+	Subordinate_Financing_1__c: payload.subordinateFinancing1 as String,
+	Subordinate_Financing_2__c: payload.subordinateFinancing2 as String,
+	Subordinate_Financing_3__c: payload.subordinateFinancing3 as String,
+	Supplemental_Type__c: payload.supplementalType,
+	Third_Party_Closing_Transaction_Fees__c: payload.thirdPartyClosingTransactionFees as String,
+	Tier_Level__c: payload.guideTierLevel,
+	Tier_Maximum_LTV__c: payload.guideMaximumLTV as String,
+	Tier_Minimum_Actual_Cooperative_DSCR__c: payload.guideMinActualCooperativeDSCR,
+	Tier_Minimum_Underwritten_DSCR__c: payload.guideMinUWDSCRperGuide,
+	Total_Fixed_Rate_Investor_Spread__c: payload.totalFixedRateInvestorSpread as String,
+	Total_Variable_Rate_Investor_Spread__c: payload.totalVariableRateInvestorSpread as String,
+	Treasury_Rate__c: payload.treasuryRate as String,
+	Type__c: payload.Type,
+	UW_Interest_Rate_Floor_per_Guide__c: payload.uWInterestRateFloorperGuide as String,
+	Variable_Product_Type__c: payload.variableProductType,
+	X1st_Lien_Actual_Interest_Rate__c: payload.x1stLienActualFixedFixedEquivalentInterestRate as String,
+	X1st_Lien_Amortization_Term_months__c: payload.x1stLienAmortizationTermMonths,
+	X1st_Lien_Current_UPB_Amount__c: payload.x1stLienCurrentUPBAmount as String,
+	X1st_Lien_Interest_Basis__c: payload.x1stLienInterestBasis,
+	X1st_Lien_Interest_Only_Period_months__c: payload.x1stLienInterestOnlyPeriodMonths,
+	X1st_Lien_Interest_Type__c: payload.x1stLienInterestType,
+	X1st_Lien_Loan_Maturity_Date__c: payload.x1stLienLoanMaturityDate as Date,
+	X1st_Lien_Loan_Term_months__c: payload.x1stLienLoanTermMonths,
+	X1st_Lien_Original_Loan_Amount__c: payload.x1stLienOriginalLoanAmount as String,
+	X1st_Lien_Purchased_Cap_Stike_Rate__c: payload.x1stLienPurchasedCapStrikeRate as String,
+	X1st_Lien_Required_Min_DSCR_for_Loan_Siz__c: payload.x1stLienRequiredMinDSCRforLoanSizing,
+	X1st_Lien_Variable_UW_Interest_Rate__c: payload.x1stLienVariableUWInterestRate as String,
+	X2nd_Lien_Actual_Interest_Rate__c: payload.x2ndLienActualFixedFixedEquivalentInterestRate as String,
+	X2nd_Lien_Amortization_Term_months__c: payload.x2ndLienAmortizationTermMonths,
+	X2nd_Lien_Current_UPB_Amount__c: payload.x2ndLienCurrentUPBAmount as String,
+	X2nd_Lien_Interest_Basis__c: payload.x2ndLienInterestBasis,
+	X2nd_Lien_Interest_Only_Period_months__c: payload.x2ndLienInterestOnlyPeriodMonths,
+	X2nd_Lien_Interest_Type__c: payload.x2ndLienInterestType,
+	X2nd_Lien_Loan_Maturity_Date__c: payload.x2ndLienLoanMaturityDate as Date,
+	X2nd_Lien_Loan_Term_months__c: payload.x2ndLienLoanTermMonths,
+	X2nd_Lien_Original_Loan_Amount__c: payload.x2ndLienOriginalLoanAmount as String,
+	X2nd_Lien_Purchased_Cap_Stike_Rate__c: payload.x2ndLienPurchasedCapStrikeRate as String,
+	X2nd_Lien_Required_Min_DSCR_for_Loan_Siz__c: payload.x2ndLienRequiredMinDSCRforLoanSizing,
+	X2nd_Lien_Variable_UW_Interest_Rate__c: payload.x2ndLienVariableUWInterestRate as String,
+	Exercising_Tier_Dropping_Option__c: payload.exercisingTierDroppingOption,
+	Green_Financing_Type__c: payload.greenFinancingType
+}]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:create doc:id="35c04d03-70d1-4afb-8299-b9382498152d" config-ref="Salesforce_Config" type="Loan_Option__c" doc:name="Create Loan Option">
+			<reconnect />
+		</salesforce:create>
+		<ee:transform doc:name="Transform Message" doc:id="6d517009-062f-4b65-8e56-d475cc285353" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+    </flow>
+	
+	<sub-flow name="ValidateAgainstInterestType" doc:id="3cc0bd84-0654-43d2-947a-09e494aef948" >
+		<validation:is-false doc:name="validate VariableProductType" doc:id="14af1d87-4004-4bea-a186-58750c86bc56" expression='#[payload.interestType == "Variable Rate" and (payload.variableProductType == "" or payload.variableProductType == null)]' message="variableProductType cannot be blank when interestType is Variable Rate"/>
+		<validation:is-false doc:name="validate Index Rate Type" doc:id="6bb35b28-71be-4a3b-b800-f29541093c77" expression='#[payload.interestType == "Variable Rate" and (payload.indexRateType == "" or payload.indexRateType == null)]' message="Index Rate Type cannot be blank when indexRateType is Variable Rate"/>
+		<validation:is-false doc:name="validate indexRate " doc:id="1e69ca39-b249-4c1d-86ba-d1395b84731d" expression='#[payload.interestType == "Variable Rate" and (payload.indexRate == "" or payload.indexRate == null)]' message="indexRate cannot be null when interestType is Variable Rate"/>
+		<validation:is-false doc:name="validate totalVariableRateInvestorSpread " doc:id="2a2140d0-9d50-4cc4-9bc9-be62d168e5de" expression='#[payload.interestType == "Variable Rate" and (payload.totalVariableRateInvestorSpread == null)]' message="totalVariableRateInvestorSpread cannot be null when interestType is Variable Rate"/>
+		<validation:is-false doc:name="validate requestedVariableRateGuarantyFee" doc:id="094f3b15-bd8c-41b6-92ee-23f91462dca8" expression='#[payload.interestType == "Variable Rate" and payload.requestedVariableRateGuarantyFee == null]' message="requestedVariableRateGuarantyFee cannot be null when interestType is Variable Rate"/>
+		<validation:is-false doc:name="validate requestedVariableRateServicingFee" doc:id="080ee3c1-8a1c-494c-9ca2-287a170f2511" expression='#[payload.interestType == "Variable Rate" and payload.requestedVariableRateServicingFee == null]' message="requestedVariableRateServicingFee cannot be null when interestType is Variable Rate"/>
+		<validation:is-false doc:name="validate capCostFactor" doc:id="9574c651-90fb-4fe2-86ff-40ae9ddce7fb" expression='#[payload.interestType == "Variable Rate" and payload.capCostFactor == null]' message="capCostFactor cannot be null when interest rate type is Variable Rate"/>
+		<validation:is-false doc:name="validate underwrittenStressMaxLifetimePassThruRate" doc:id="6ac37052-efa4-4d1b-af9b-9185540160a0" message="underwrittenStressMaxLifetimePassThruRate cannot be null when interestType is Variable Rate" expression='#[payload.interestType == "Variable Rate" and payload.underwrittenStressMaxLifetimePassThruRate == null]'/>
+		<validation:is-false doc:name="validate guideFRTMinUWDSCRperGuide" doc:id="eac6b79f-d38e-40f0-ae7c-640c10784201" expression='#[payload.interestType == "Variable Rate" and payload.guideFRTMinUWDSCRperGuide == null]' message="guideFRTMinUWDSCRperGuide cannot be null when interestType is Variable Rate"/>
+		<validation:is-false doc:name="validate guideFRTLTV" doc:id="6d6733fb-0840-4262-b632-9cdf90aafdf2" message="guideFRTLTV cannot be null when interestType is Variable Rate" expression='#[payload.interestType == "Variable Rate" and payload.guideFRTLTV == null]'/>
+		<validation:is-false doc:name="validate requestedFRTLTV" doc:id="95c40539-555d-4233-912f-8b840ee21ea5" message="requestedFRTLTV cannot be null when interestType is Variable Rate" expression='#[payload.interestType == "Variable Rate" and payload.requestedFRTLTV == null]'/>
+		<validation:is-false doc:name="validate requestedFRTMinAmortizingUWNCFDSCR" doc:id="3faaa203-9069-46f0-9fc2-891849c923b4" message="requestedFRTMinAmortizingUWNCFDSCR cannot be null when interestType is Variable Rate" expression='#[payload.interestType == "Variable Rate" and payload.requestedFRTMinAmortizingUWNCFDSCR == null]'/>
+		<validation:is-false doc:name="validate requestedFRTMinUWDSCRperGuide" doc:id="900703a3-886e-434a-8147-bcac704dfb12" message="requestedFRTMinUWDSCRperGuide cannot be null when InterestType is Variable Rate" expression='#[payload.interestType == "Variable Rate" and payload.requestedFRTMinUWDSCRperGuide == null]'/>
+	</sub-flow>
+	<sub-flow name="ValidateAgainstProductType" doc:id="c02fc771-ecde-4acf-9a0f-02de86ce6aba" >
+		<validation:is-false doc:name="Validate sARMInitialCapTermMonths" doc:id="4c5b613c-2611-4246-ab18-a238e2d6d58f" expression='#[payload.variableProductType == "SARM" and payload.sARMInitialCapTermMonths == null]' message="sARMInitialCapTermMonths cannot be null when variable product type is SARM"/>
+		<validation:is-false doc:name="Validate sARMMinCapStrikeRate" doc:id="d5fae8e1-cefb-4ee6-9997-c3f8629fdae4" expression='#[payload.sARMMinCapStrikeRate ==null and payload.variableProductType == "SARM"]' message="sARMMinCapStrikeRate cannot be null when variable product type is SARM"/>
+	</sub-flow>
+	<sub-flow name="ValidateAgainstPrepayComps" doc:id="155ebd62-f282-4069-8ca1-faf1e68e8f65" >
+		<validation:is-false doc:name="Validate decliningPremiumSchedule" doc:id="3815a75a-4e61-43ab-b94f-d37bea75e720" expression='#[(payload.decliningPremiumSchedule == "" or  payload.decliningPremiumSchedule == null) and (payload.prepaymentComponent2 == "Declining Premium" or payload.Prepayment_Component_1__c == "Declining Premium")]' message="decliningPremiumSchedule is required when either prepayment components have declining premium"/>
+		<validation:is-false doc:name="Validate otherPrepaymentPremiumSchedule" doc:id="8318974b-25a5-452d-bb0c-2a9f2fc7be76" expression='#[(payload.otherPrepaymentPremiumSchedule == "" or payload.otherPrepaymentPremiumSchedule == null) and (payload.prepaymentComponent2 == "Other Prepayment Premium" or payload.Prepayment_Component_1__c == "Other Prepayment Premium")]' message="otherPrepaymentPremiumSchedule is required when either prepayment components are Other Prepayment Premium"/>
+	</sub-flow>
+	<sub-flow name="MiscValidations" doc:id="05061d23-01fe-4926-befa-c8defd384b82" >
+		<validation:is-false doc:name="Validate loanTermMonths" doc:id="22fa8c90-0f78-4dec-a128-565839e11c14" expression="#[payload.loanTermMonths &gt; payload.amortizationTermMonths]" message="Loan Term Months cannot be greater than Amortization Term Months"/>
+		<validation:is-false doc:name="Validate interestOnlyPeriodMonths" doc:id="a203e913-596d-4c7c-a37a-3f1d935333aa" expression="#[payload.interestOnlyPeriodMonths &lt;= payload.loanTermMonths]"/>
+		<validation:is-false doc:name="Validate prepaymentComponenttoMonths1" doc:id="5d9ddbba-3707-4bda-885c-ef7e9e1b69d2" expression="#[payload.prepaymentComponenttoMonths1 &lt; 0 or payload.prepaymentComponenttoMonths1 &gt; payload.loanTermMonths]" message="prepaymentComponenttoMonths1 cannot be less than zero and should be always less than or equal to loan term months"/>
+		<validation:is-false doc:name="Validate prepaymentComponenttoMonths2" doc:id="5edf21af-efc7-4de6-9fc4-bf88e3f3c575" expression="#[payload.prepaymentComponenttoMonths2 &lt; 0 or payload.prepaymentComponenttoMonths2 &gt; payload.loanTermMonths]" message="prepaymentComponenttoMonths2 cannot be less than zero and should be always less than or equal to loan term months"/>
+	</sub-flow>
+</mule>
