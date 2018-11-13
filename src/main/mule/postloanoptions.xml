@@ -10,6 +10,7 @@ http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mu
     <salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="2137b71e-e79f-42e6-bec0-9421018c04ae" >
 		<salesforce:basic-connection username="${sfdc.username}" password="${sfdc.password}" url="https://test.salesforce.com/services/Soap/u/43.0" />
 	</salesforce:sfdc-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="9a7a54e3-593f-4966-8b91-10f8b05e7bc6" file="local-config.yaml" />
 	<flow name="postloanoptions-main">
         <http:listener config-ref="postloanoptions-httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
@@ -157,6 +158,27 @@ output application/java
 ---
 payload.Id[0]]]></ee:set-variable>
 			</ee:variables>
+		</ee:transform>
+		<validation:is-true doc:name="Validate if opportunity id " doc:id="b72f0ba1-1b10-42a1-9cc6-746cb57df2de" expression='#[vars.opportunityId != null and vars.opportunityId != ""]' message="Provided deal id is not accessible or does not exist"/>
+	</sub-flow>
+	<sub-flow name="RetrieveLONameFromId" doc:id="82289c65-5dde-4aee-a73e-a5027dcbccb9" >
+		<salesforce:query doc:name="Query" doc:id="3ece2407-834d-4ca8-8c92-9e1cae38dce1" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query >SELECT Name FROM Loan_Option__c WHERE id = ':id'</salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	"id" : payload
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<ee:transform doc:name="Transform Message" doc:id="ff38a50c-1568-4903-8080-7d501a0b365a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"name":payload[0].Name
+}]]></ee:set-payload>
+			</ee:message>
 		</ee:transform>
 	</sub-flow>
 	<flow name="post:\loanoption:application\json:postloanoptions-config">
@@ -310,14 +332,16 @@ output application/java
 		<salesforce:create doc:id="35c04d03-70d1-4afb-8299-b9382498152d" config-ref="Salesforce_Config" type="Loan_Option__c" doc:name="Create Loan Option">
 			<reconnect />
 		</salesforce:create>
-		<ee:transform doc:name="Transform Message" doc:id="6d517009-062f-4b65-8e56-d475cc285353" >
+		<validation:is-true doc:name="Is true" doc:id="f4b05626-6cfc-40cc-b663-265be2f8875c" expression="#[payload[0].success]" message="Unable to create Loan Options"/>
+		<ee:transform doc:name="Extract id from payload" doc:id="a2a79374-5877-49ce-b155-4f01fb60c699" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
+output application/java
 ---
-payload]]></ee:set-payload>
+payload[0].id]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
+		<flow-ref doc:name="Get Name of newly created LO" doc:id="c9020a92-b0e2-4b30-b98e-a3fe816d5cbe" name="RetrieveLONameFromId"/>
     </flow>
 	
 	<sub-flow name="ValidateAgainstInterestType" doc:id="3cc0bd84-0654-43d2-947a-09e494aef948" >
@@ -346,7 +370,8 @@ payload]]></ee:set-payload>
 	<sub-flow name="MiscValidations" doc:id="05061d23-01fe-4926-befa-c8defd384b82" >
 		<validation:is-false doc:name="Validate loanTermMonths" doc:id="22fa8c90-0f78-4dec-a128-565839e11c14" expression="#[payload.loanTermMonths &gt; payload.amortizationTermMonths]" message="Loan Term Months cannot be greater than Amortization Term Months"/>
 		<validation:is-false doc:name="Validate interestOnlyPeriodMonths" doc:id="a203e913-596d-4c7c-a37a-3f1d935333aa" expression="#[payload.interestOnlyPeriodMonths &gt; payload.loanTermMonths]" message="interestOnlyPeriodMonths cannot be greater than loanTermMonths"/>
-		<validation:is-false doc:name="Validate prepaymentComponenttoMonths1" doc:id="5d9ddbba-3707-4bda-885c-ef7e9e1b69d2" expression="#[payload.prepaymentComponenttoMonths1 &lt; 0 or payload.prepaymentComponenttoMonths1 &gt; payload.loanTermMonths]" message="prepaymentComponenttoMonths1 cannot be less than zero and should be always less than or equal to loan term months"/>
-		<validation:is-false doc:name="Validate prepaymentComponenttoMonths2" doc:id="5edf21af-efc7-4de6-9fc4-bf88e3f3c575" expression="#[payload.prepaymentComponenttoMonths2 &lt; 0 or payload.prepaymentComponenttoMonths2 &gt; payload.loanTermMonths]" message="prepaymentComponenttoMonths2 cannot be less than zero and should be always less than or equal to loan term months"/>
+		<validation:is-false doc:name="Validate prepaymentComponenttoMonths1" doc:id="5d9ddbba-3707-4bda-885c-ef7e9e1b69d2" expression="#[payload.prepaymentComponenttoMonths1 != null and (payload.prepaymentComponenttoMonths1 &lt; 0 or payload.prepaymentComponenttoMonths1 &gt; payload.loanTermMonths)]" message="prepaymentComponenttoMonths1 cannot be less than zero and should be always less than or equal to loan term months"/>
+		<validation:is-false doc:name="Validate prepaymentComponenttoMonths2" doc:id="5edf21af-efc7-4de6-9fc4-bf88e3f3c575" expression="#[((payload.prepaymentComponenttoMonths2 != null and payload.prepaymentComponenttoMonths2 &lt; 0 ) or (payload.prepaymentComponenttoMonths2 != null and payload.prepaymentComponenttoMonths2 &gt; payload.loanTermMonths))]" message="prepaymentComponenttoMonths2 cannot be less than zero and should be always less than or equal to loan term months"/>
+		<validation:is-false doc:name="validate prepaymentComponenttoMonths2 when prepaymentComponent2 is given" doc:id="c1a7bc88-87bd-496e-b12f-fa20ad404ed8" expression='#[(payload.prepaymentComponent2 != null or payload.prepaymentComponent2 != "") and (payload.prepaymentComponenttoMonths2 == null or payload.prepaymentComponenttoMonths2 == "" or payload.prepaymentComponenttoMonths2 == 0)]' message="prepaymentComponenttoMonths2 is required when prepaymentComponent2 is given"/>
 	</sub-flow>
 </mule>
