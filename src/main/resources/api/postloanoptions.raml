@@ -5,14 +5,11 @@ version: 1.0.0
 protocols:
   - HTTPS
   - HTTP
-baseUri: https://mocksvc.mulesoft.com/mocks/6c7b2fb3-8b19-4b8b-a56a-296f54118558 # baseUri: /
+baseUri: https://mocksvc.mulesoft.com/mocks/40e8fdb7-7f15-4fdb-8fdd-84ac1e004a96 # baseUri: /
 annotationTypes:
   oas-format:
     type: string
     allowedTargets: TypeDeclaration
-  oas-responses-default:
-    type: any
-    allowedTargets: Method
   oas-body-name:
     type: string
     allowedTargets: TypeDeclaration
@@ -20,27 +17,26 @@ annotationTypes:
     type: string
     allowedTargets: Method
 types:
+  LoanOptions:
+    type: array
+    items: LoanOption
   LoanOption:
     type: object
     properties:
       dealId:
-        required: true
         example: 12345
         type: number
         (oas-format): int
       loanAmount:
         minimum: 1
         maximum: 10000000000000000
-        required: true
         example: 25000000
         type: number
         format: double
       Type:
-        required: true
         example: Ask
         type: string
       Status:
-        required: true
         example: Draft
         default: Draft
         type: string
@@ -49,11 +45,10 @@ types:
       Comments:
         minLength: 0
         maxLength: 200
-        required: false
         example: This is a comment.
         type: string
+        required: false
       interestType:
-        required: true
         example: Variable Rate
         type: string
         enum:
@@ -62,22 +57,14 @@ types:
       variableProductType:
         required: false
         example: SARM
-        type: string
-        enum:
-          - SARM
-          - DMBS
-          - ARM 7/6
-          - ARM 7/4
-          - Fixed+1
+        enum: ["SARM","DMBS","ARM 7/6","ARM 7/4","Fixed+1",""]
       lienPosition:
         minimum: 1
         maximum: 3
-        required: true
         example: 1
         type: number
         (oas-format): int
       supplementalType:
-        required: false
         example: Coterminous
         type: string
         enum:
@@ -85,43 +72,41 @@ types:
           - Non-Coterminous
           - DUS Split 2nd
           - New Loan Test
-      exercisingTierDroppingOption:
+          - ""
         required: false
+      exercisingTierDroppingOption:
         example: 'Yes'
         type: string
         enum:
           - 'Yes'
           - 'No'
+          - ""
+        required: false
       loanTermMonths:
         minimum: 1
         maximum: 480
-        required: true
         example: 120
         type: number
         (oas-format): int
       interestOnlyPeriodMonths:
         minimum: 0
         maximum: 480
-        required: true
         example: 24
         type: number
         (oas-format): int
       amortizationTermMonths:
         minimum: 1
         maximum: 480
-        required: true
         example: 360
         type: number
         (oas-format): int
       lossSharingPercent:
         minimum: 0
         maximum: 100
-        required: true
         example: 100
         type: number
         format: double
       prepaymentComponent1:
-        required: true
         example: Yield Maintenance
         type: string
         enum:
@@ -136,12 +121,10 @@ types:
       prepaymentComponenttoMonths1:
         minimum: 0
         maximum: 480
-        required: true
         example: 174
         type: number
         (oas-format): int
       prepaymentComponent2:
-        required: false
         example: 1%  Fixed Prepayment
         type: string
         enum:
@@ -153,15 +136,16 @@ types:
           - Fee Maintenance
           - Other Prepayment Premium
           - 1%  Fixed Prepayment
+          - ""
+        required: false
       prepaymentComponenttoMonths2:
         minimum: 0
         maximum: 480
-        required: false
         example: 177
         type: number
         (oas-format): int
-      decliningPremiumSchedule:
         required: false
+      decliningPremiumSchedule:
         example: 5-4-3-2-1-1-1-1-1-1
         type: string
         enum:
@@ -177,213 +161,208 @@ types:
           - 5-5-5-5-5-5-5-4-4-3-3-2-2-1-1
           - 5-5-5-5-5-5-5-4-4-3-3-2-2-1-1-1-1-1
           - 5-5-5-5-5-5-5-4-4-3-3-2-2-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1
-      otherPrepaymentPremiumSchedule:
+          - ""
         required: false
+      otherPrepaymentPremiumSchedule:
         example: 5-5-5-2-2-1-1-1-1-1
         type: string
+        required: false
       propertyGrossPotentialRent:
         minimum: 0
-        required: true
         example: 2504467
         type: number
         format: double
       propertyEconomicVacancyAmount:
-        required: true
         example: -125223.35
         type: number
         format: double
-        maximum: -1
       propertyOtherIncome:
         minimum: 0
-        required: true
         example: 40230.35
         type: number
         format: double
       propertyManagementFee:
         minimum: 0
-        required: true
         example: 60486.85
         type: number
         format: double
       propertyRealEstateTaxes:
         minimum: 0
-        required: true
         example: 190000
         type: number
         format: double
       propertyInsurance:
         minimum: 0
-        required: true
         example: 92788
         type: number
         format: double
       propertyOtherExpenses:
         minimum: 0
-        required: true
         example: 858736.15
         type: number
         format: double
       propertyReplacementReserves:
         minimum: 0
-        required: true
         example: 27000
         type: number
         format: double
       propertyActualCooperativeNCF:
-        required: false
         example: 85000
         type: number
         format: double
+        required: false
       propertyPurchasePrice:
         minimum: 0
-        required: false
         example: 1500000
         type: number
         format: double
+        required: false
       propertyCost:
         minimum: 0
-        required: false
         example: 1500000
         type: number
         format: double
+        required: false
       propertyUnderwrittenValue:
         minimum: 0
-        required: true
         example: 15872826.67
         type: number
         format: double
       propertyUnitCount:
         minimum: 5
-        required: true
         example: 250
         type: number
         (oas-format): int
       x1stLienInterestType:
-        required: false
         example: Fixed Rate
         type: string
         enum:
           - Fixed Rate
           - Variable Rate
+          - ""
+        required: false
       x1stLienOriginalLoanAmount:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       x1stLienActualFixedFixedEquivalentInterestRate:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       x1stLienLoanTermMonths:
-        required: false
         example: 0
         type: number
         (oas-format): int
+        required: false
       x1stLienInterestOnlyPeriodMonths:
-        required: false
         example: 0
         type: number
         (oas-format): int
+        required: false
       x1stLienAmortizationTermMonths:
-        required: false
         example: 0
         type: number
         (oas-format): int
+        required: false
       x1stLienVariableUWInterestRate:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       x1stLienPurchasedCapStrikeRate:
-        required: false
         example: 0
         type: number
         format: double
-      x1stLienInterestBasis:
         required: false
+      x1stLienInterestBasis:
         example: Actual/360
         type: string
         enum:
           - Actual/360
           - 30/360
-      x1stLienLoanMaturityDate:
+          - ""
         required: false
+      x1stLienLoanMaturityDate:
         example: '1900-01-01'
         type: date-only
+        required: false
       x1stLienCurrentUPBAmount:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       x1stLienRequiredMinDSCRforLoanSizing:
-        required: false
         example: 0
         type: number
         format: double
-      x2ndLienInterestType:
         required: false
+      x2ndLienInterestType:
         example: Fixed Rate
         type: string
         enum:
           - Fixed Rate
           - Variable Rate
+          - ""
+        required: false
       x2ndLienOriginalLoanAmount:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       x2ndLienActualFixedFixedEquivalentInterestRate:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       x2ndLienLoanTermMonths:
-        required: false
         example: 0
         type: number
         (oas-format): int
+        required: false
       x2ndLienInterestOnlyPeriodMonths:
-        required: false
         example: 0
         type: number
         (oas-format): int
+        required: false
       x2ndLienAmortizationTermMonths:
-        required: false
         example: 0
         type: number
         (oas-format): int
+        required: false
       x2ndLienVariableUWInterestRate:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       x2ndLienPurchasedCapStrikeRate:
-        required: false
         example: 0
         type: number
         format: double
-      x2ndLienInterestBasis:
         required: false
+      x2ndLienInterestBasis:
         example: Actual/360
         type: string
         enum:
           - Actual/360
           - 30/360
-      x2ndLienLoanMaturityDate:
+          - ""
         required: false
+      x2ndLienLoanMaturityDate:
         example: '1900-01-01'
         type: date-only
+        required: false
       x2ndLienCurrentUPBAmount:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       x2ndLienRequiredMinDSCRforLoanSizing:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       pricingMethod:
         required: true
         example: Standard
@@ -396,70 +375,63 @@ types:
           - First Level Lender Delegated
           - Second Level Lender Delegated
       greenFinancingType:
-        required: true
         example: N/A
         type: string
         enum:
           - N/A
           - Green Rewards
           - Green Preservation Plus
-          - Green Building Certification
+          - 'Green Building Certification '
       latestPricingMemoGuarantyFee:
-        required: true
         example: 1.12
         type: number
         format: double
       latestPricingMemoServicingFee:
-        required: true
         example: 0.29
         type: number
         format: double
       commitmentPerioddays:
-        required: true
         example: 60
         type: number
         (oas-format): int
       rateLockType:
-        required: true
         example: Standard
         type: string
         enum:
           - Standard
           - Streamlined
       interestBasis:
-        required: true
         example: Actual/360
         type: string
         enum:
           - Actual/360
           - 30/360
       loanPurchasePriceofpar:
-        required: false
         example: 101
         type: number
         format: double
+        required: false
       excessOriginationPremiumAmount:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       estimatedOriginationFee:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       originationFeePaidtoBroker:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       originationFeePaidtoCorrespondent:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       fixedIndexRateType:
-        required: true
         example: 10-Year Treasury Note
         type: string
         enum:
@@ -474,32 +446,26 @@ types:
           - 10-Year Treasury Note
           - 30-Year Treasury Note
       treasuryRate:
-        required: true
         example: 1.37
         type: number
         format: double
       totalFixedRateInvestorSpread:
-        required: true
         example: 1.39
         type: number
         format: double
       requestedFixedRateGuarantyFee:
-        required: true
         example: 0.9
         type: number
         format: double
       requestedFixedRateServicingFee:
-        required: true
         example: 0.21
         type: number
         format: double
       otherFixedRateFeeSpread:
-        required: true
         example: 0
         type: number
         format: double
       indexRateType:
-        required: false
         example: 1 Month LIBOR
         type: string
         enum:
@@ -512,282 +478,280 @@ types:
           - 1 Month LIBOR
           - 3 Month LIBOR
           - 6 Month LIBOR
+          - ""
+        required: false
       indexRate:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       totalVariableRateInvestorSpread:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       requestedVariableRateGuarantyFee:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       requestedVariableRateServicingFee:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       capCostFactor:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       underwrittenStressMaxLifetimePassThruRate:
-        required: false
         example: 0
         type: number
         format: double
-      sARMInitialCapTermMonths:
         required: false
+      sARMInitialCapTermMonths:
         example: 0
         type: number
         (oas-format): int
-      sARMMinCapStrikeRate:
         required: false
+      sARMMinCapStrikeRate:
         example: 0
         type: number
         format: double
-      uWInterestRateFloorperGuide:
         required: false
+      uWInterestRateFloorperGuide:
         example: 3.87
         type: number
         format: double
+        required: false
       guideTierLevel:
-        required: true
         example: Tier 4
         type: string
         enum:
           - Tier 2
           - Tier 3
           - Tier 4
+          - ""
       guideMinActualCooperativeDSCR:
-        required: false
         example: 1
         type: number
         format: double
+        required: false
       guideMinUWDSCRperGuide:
-        required: true
         example: 1.55
         type: number
         format: double
       guideMaximumLTV:
-        required: true
         example: 55
         type: number
         format: double
       guideFRTMinActualCooperativeDSCR:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       guideFRTMinUWDSCRperGuide:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       guideFRTLTV:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       requestedTierLevel:
-        required: true
         example: Tier 4
         type: string
         enum:
           - Tier 2
           - Tier 3
           - Tier 4
-      requestedMinActualCooperativeDSCR:
+          - ""
         required: false
+      requestedMinActualCooperativeDSCR:
         example: 1
         type: number
         format: double
+        required: false
       requestedMinUWDSCRperGuide:
-        required: true
         example: 5
         type: number
         format: double
       requestedMinAmortizingUWNCFDSCR:
-        required: true
         example: 1
         type: number
         format: double
       requestedMaximumLTV:
-        required: true
         example: 25
         type: number
         format: double
-      requestedMaximumLTC:
-        required: false
+      requestedMaximumLTC?:
         example: 80
         type: number
         format: double
+        required: false
       requestedFRTMinActualNCFCOOPDSCR:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       requestedFRTMinUWDSCRperGuide:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       requestedFRTMinAmortizingUWNCFDSCR:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       requestedFRTLTV:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       expectedExitRefinanceCosts:
-        required: false
         example: 0
         type: number
         format: double
-      expectedExitAmortizationTerm:
         required: false
+      expectedExitAmortizationTerm:
         example: 360
         type: number
         (oas-format): int
-      expectedExitMinUWDSCRperGuide:
         required: false
+      expectedExitMinUWDSCRperGuide:
         example: 1.25
         type: number
         format: double
-      expectedExitMaximumLTV:
         required: false
+      expectedExitMaximumLTV:
         example: 80
         type: number
         format: double
+        required: false
       expectedExitRefinanceInterestRate:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       expectedExitTerminalCapRate:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       mezzanineandPreferredEquityDebtService:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       subordinateFinancing1:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       subordinateFinancing2:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       subordinateFinancing3:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       mezzPreferredEquity1:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       mezzPreferredEquity2:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       lIHTCEquity:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       otherSources:
-        required: false
         example: 0
         type: number
         format: double
-      payoffExistingMortgageLoan:
         required: false
+      payoffExistingMortgageLoan:
         example: 1088000
         type: number
         format: double
+        required: false
       prepaymentPremium:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       propertyDevelopmentConstructionCost:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       affiliatedMezzanineDebtorPreferredEquityPayoff:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       nonAffiliatedMezzanineDebtorPreferredEquityPayoff:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       propertyFundedCapitalImprovements:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       propertyFundedCapitalExpendituresReplacementReserveAccount:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       propertyFundedCompletionRepairs:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       propertyFundedOtherEscrows:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       interestRateCapHedgingFees:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       originationFees:
-        required: false
         example: 0
         type: number
         format: double
-      lenderClosingTransactionFees:
         required: false
+      lenderClosingTransactionFees:
         example: 50000
         type: number
         format: double
+        required: false
       thirdPartyClosingTransactionFees:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
       otherUses:
-        required: false
         example: 0
         type: number
         format: double
+        required: false
 /loanoption:
   post:
     description: Creates a new Loan Option
@@ -805,6 +769,6 @@ types:
     body:
       application/json:
         description: Loan Option Request
-        type: LoanOption
+        type: LoanOptions
         (oas-body-name): body
     (oas-summary): Add a new Loan Option

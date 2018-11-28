@@ -1,0 +1,43 @@
+{
+	"records": [{
+			"attributes": {
+				"type": "Opportunity",
+				"referenceId": "ref1"
+			},
+			"Name": "PD Test Deal 5101 3",
+			"AccountId": "0013C000009ushG",
+			"Originator__c": "0033C000006uxDP",
+			"Lender_Contact_Name__c": "0033C000007gj44",
+			"Agreement_Type__c": "DUS",
+			"Execution_Type__c": "MBS",
+			"Loan_Purpose__c": "Refinance",
+			"Submission_Type__c": "Pre-Review (4660)",
+			"Green_Financing_Type__c": "N/A",
+			"Chapter_9_Small_Loans__c": "No",
+			"Amount": 1.9989789E7,
+			"Estimated_MBS_Issuance_Date__c": "2018-12-09",
+			"CloseDate": "2018-12-09",
+			"StageName": "Pre-Registered",
+			"Deal_Participants__r": {
+				"records": [{
+						"attributes": {
+							"type": "Deal_Participant__c",
+							"referenceId": "ref2"
+						},
+						"Entity_Name__c": "Bell,Steve,D",
+						"Participant_Name_Autofill__c": "Bell,Steve,D, .( Greensboro , North Carolina ) - Individual",
+						"Participant_Role__c": "Sponsor"
+					}, {
+						"attributes": {
+							"type": "Deal_Participant__c",
+							"referenceId": "ref3"
+						},
+						"Entity_Name__c": "Bell,Steve,D",
+						"Participant_Name_Autofill__c": "Bell,Steve,D, .( Greensboro , North Carolina ) - Individual",
+						"Participant_Role__c": "Sponsor"
+					}
+				]
+			}
+		}
+	]
+}

@@ -1,5 +1,14 @@
 {
   "sampleData": {
-    "ba7dbb45-da04-431b-a008-1ec0b2fa0d6a": {}
+    "ba7dbb45-da04-431b-a008-1ec0b2fa0d6a": {},
+    "a80dd535-03f5-433f-ae27-97852377595f": {
+      "payload": "sample_data/json.json"
+    },
+    "17fd0da9-8c14-4ced-9ef3-0f6e2c709a49": {
+      "payload": "sample_data/object.dwl"
+    },
+    "07f1485e-b23c-490b-9ba1-036cf057133a": {
+      "payload": "sample_data/unknown.dwl"
+    }
   }
 }

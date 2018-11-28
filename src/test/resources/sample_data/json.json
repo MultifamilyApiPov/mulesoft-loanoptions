@@ -1,0 +1,27 @@
+{
+	"deal": {
+		"reference": "deal1",
+		"dealAmount": 19989789.00,
+		"chapter9SmallLoansIndicator": "No",
+		"estimatedLoanClosingDate": "2018-12-06",
+		"estimatedMBSIssuanceDate": "2018-12-06",
+		"excludedFromScorecardCapPercent": null,
+		"executionType": "MBS",
+		"greenFinancingType": "N/A",
+		"lenderContactEmail": "naveen_k_kontham@fanniemae.com",
+		"loanPurposeType": "Acquisition",
+		"dealName": "Automation APIDeal 270818141806465",
+		"originatorEmail": "transaction_management_analysts@fanniemae.com",
+		"submissionType": "Pre-Review (4660)",
+		"dealParticipants": [{
+				"reference": "dealparticipant1",
+				"entityName": "RTS Manufacturing",
+				"participantRoleType": "Sponsor;Key Principal;Principal"
+			}, {
+				"reference": "dealparticipant2",
+				"entityName": "RTS Manufacturing",
+				"participantRoleType": "Sponsor;Key Principal;Principal"
+			}
+		]
+	}
+}

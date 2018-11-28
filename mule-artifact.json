@@ -1,8 +1,1 @@
-{
-	"minMuleVersion": "4.1.4",
-	"secureProperties": [
-		"sfdc.username",
-		"sfdc.password",
-		"http.port"
-	]
-}
+{"minMuleVersion":"4.1.4","secureProperties":["sfdc.username","sfdc.password","http.port"]}
